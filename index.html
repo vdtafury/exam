@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCQ Exam System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>MCQ Examination System</h1>
+            <p>Please enter your name to begin the exam</p>
+        </header>
+
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen" class="card">
+            <form id="startForm">
+                <div class="form-group">
+                    <label for="studentName">Full Name *</label>
+                    <input type="text" id="studentName" class="form-control" placeholder="Enter your full name" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Start Exam</button>
+            </form>
+        </div>
+
+        <!-- Exam Screen -->
+        <div id="examScreen" class="exam-container hidden">
+            <!-- Progress Bar -->
+            <div class="progress">
+                <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+            </div>
+
+            <!-- Timer -->
+            <div class="card">
+                <div class="timer" id="timer">
+                    <span>⏱️</span>
+                    <span id="timeDisplay">00:00</span>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="question-card" id="questionCard">
+                <div class="question-header">
+                    <span class="question-number" id="questionNumber">Q1/20</span>
+                    <span id="questionMarks">1 Mark</span>
+                </div>
+                
+                <div class="question-text" id="questionText">
+                    Loading question...
+                </div>
+                
+                <ul class="options-list" id="optionsList">
+                    <!-- Options will be dynamically added here -->
+                </ul>
+            </div>
+
+            <!-- Navigation -->
+            <div class="exam-navigation">
+                <button id="prevBtn" class="btn btn-secondary" disabled>Previous</button>
+                <button id="nextBtn" class="btn btn-primary">Next</button>
+                <button id="submitBtn" class="btn btn-success hidden">Submit Exam</button>
+            </div>
+        </div>
+
+        <!-- Success Screen -->
+        <div id="successScreen" class="card hidden">
+            <div class="text-center">
+                <h2>✅ Exam Submitted Successfully!</h2>
+                <p>Thank you for completing the exam. Your responses have been recorded.</p>
+                <p>Please close this window. Your results will be evaluated by the administrator.</p>
+            </div>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="card hidden">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading exam questions...</p>
+            </div>
+        </div>
+
+        <!-- Message Container -->
+        <div id="messageContainer"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/firebase.js"></script>
+    <script src="js/student.js"></script>
+</body>
+</html>

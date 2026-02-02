@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - MCQ Exam System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Admin Dashboard</h1>
+            <p>Manage MCQ Exam System</p>
+        </header>
+
+        <!-- Admin Navigation -->
+        <div class="admin-header card">
+            <nav class="admin-nav">
+                <button class="btn btn-primary" onclick="showTab('questions')">Questions</button>
+                <button class="btn btn-secondary" onclick="showTab('submissions')">Submissions</button>
+                <button class="btn btn-warning" onclick="showTab('settings')">Settings</button>
+                <a href="index.html" class="btn btn-success">Go to Exam</a>
+            </nav>
+        </div>
+
+        <!-- Questions Tab -->
+        <div id="questionsTab" class="tab-content active">
+            <div class="card">
+                <h2>Add New Question</h2>
+                <form id="questionForm" class="question-form">
+                    <div class="form-group">
+                        <label for="questionText">Question Text *</label>
+                        <textarea id="questionText" class="form-control" rows="3" placeholder="Enter the question text" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="questionType">Question Type *</label>
+                        <select id="questionType" class="form-control" required>
+                            <option value="single">Single Choice</option>
+                            <option value="multi">Multiple Choice</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Options *</label>
+                        <div id="optionsContainer" class="options-container">
+                            <div class="option-input-group">
+                                <input type="text" class="form-control" placeholder="Option A" required>
+                                <button type="button" class="btn btn-danger" onclick="removeOption(this)">Remove</button>
+                            </div>
+                            <div class="option-input-group">
+                                <input type="text" class="form-control" placeholder="Option B" required>
+                                <button type="button" class="btn btn-danger" onclick="removeOption(this)">Remove</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="addOption()">Add Option</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Correct Answers *</label>
+                        <div id="correctAnswersContainer">
+                            <!-- Will be populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="questionMarks">Marks *</label>
+                        <input type="number" id="questionMarks" class="form-control" min="1" value="1" required>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">Save Question</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetQuestionForm()">Reset</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Existing Questions</h2>
+                <div class="btn-group">
+                    <button class="btn btn-warning" onclick="importSampleQuestions()">Import Sample Questions</button>
+                    <button class="btn btn-danger" onclick="clearAllQuestions()">Clear All Questions</button>
+                </div>
+                <div id="questionsList" class="questions-list">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading questions...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submissions Tab -->
+        <div id="submissionsTab" class="tab-content">
+            <div class="card">
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="loadSubmissions()">Refresh</button>
+                    <button class="btn btn-success" onclick="exportSubmissions()">Export CSV</button>
+                    <button class="btn btn-danger" onclick="clearAllSubmissions()">Clear All</button>
+                </div>
+            </div>
+
+            <div class="submissions-table card">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Submitted At</th>
+                            <th>Duration</th>
+                            <th>Score</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="submissionsTableBody">
+                        <tr>
+                            <td colspan="5" class="text-center">Loading submissions...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settingsTab" class="tab-content">
+            <div class="card">
+                <h2>Exam Settings</h2>
+                <form id="settingsForm" class="settings-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="examDuration">Exam Duration (minutes) *</label>
+                            <input type="number" id="examDuration" class="form-control" min="1" value="60" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="examStatus">Exam Status</label>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <label class="switch">
+                                    <input type="checkbox" id="examEnabled">
+                                    <span class="slider"></span>
+                                </label>
+                                <span id="examStatusText">Disabled</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="shuffleQuestions">Shuffle Questions</label>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <label class="switch">
+                                    <input type="checkbox" id="shuffleQuestions">
+                                    <span class="slider"></span>
+                                </label>
+                                <span id="shuffleQuestionsText">Disabled</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="shuffleOptions">Shuffle Options</label>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <label class="switch">
+                                    <input type="checkbox" id="shuffleOptions">
+                                    <span class="slider"></span>
+                                </label>
+                                <span id="shuffleOptionsText">Disabled</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">Save Settings</button>
+                        <button type="button" class="btn btn-warning" onclick="resetExam()">Reset Exam Data</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Message Container -->
+        <div id="messageContainer"></div>
+    </div>
+
+    <!-- Submission Details Modal -->
+    <div id="submissionModal" class="card hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; max-width: 800px; max-height: 80vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3>Submission Details</h3>
+            <button class="btn btn-secondary" onclick="closeSubmissionModal()">Close</button>
+        </div>
+        <div id="submissionDetails"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/firebase.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
